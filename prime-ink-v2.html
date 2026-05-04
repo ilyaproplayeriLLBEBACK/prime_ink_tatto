@@ -1,0 +1,1751 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Prime Ink Tattoo Frankfurt — Art Lives on Skin</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cormorant+Garamond:ital,wght@0,300;0,400;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#080810;
+  --ink2:#0f0f1a;
+  --red:#C41E3A;
+  --gold:#D4A843;
+  --cream:#F0EDE6;
+  --muted:rgba(240,237,230,0.5);
+  --border:rgba(240,237,230,0.08);
+}
+html{scroll-behavior:smooth;overflow-x:hidden}
+body{background:var(--ink);color:var(--cream);font-family:'DM Sans',sans-serif;cursor:none;overflow-x:hidden}
+
+/* CURSOR */
+#c{position:fixed;width:8px;height:8px;background:var(--red);border-radius:50%;pointer-events:none;z-index:9999;transform:translate(-50%,-50%);transition:width .2s,height .2s}
+#ct{position:fixed;width:32px;height:32px;border:1px solid rgba(196,30,58,.4);border-radius:50%;pointer-events:none;z-index:9998;transform:translate(-50%,-50%);transition:left .1s,top .1s}
+body:has(a:hover,button:hover) #c{width:20px;height:20px;background:var(--gold)}
+
+/* BG CANVAS - tattoo needle 3D scene */
+#bg3d{position:fixed;inset:0;z-index:0;pointer-events:none}
+
+/* NOISE GRAIN */
+body::after{content:'';position:fixed;inset:0;z-index:9996;pointer-events:none;opacity:.025;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E")}
+
+/* NAV */
+nav{position:fixed;top:0;left:0;right:0;z-index:1000;display:flex;align-items:center;justify-content:space-between;padding:20px 5vw;border-bottom:1px solid transparent;transition:border-color .4s,background .4s}
+nav.scrolled{border-color:var(--border);background:rgba(8,8,16,.85);backdrop-filter:blur(16px)}
+.logo{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.12em;color:var(--cream);text-decoration:none;display:flex;align-items:center;gap:10px}
+.logo-dot{width:8px;height:8px;background:var(--red);border-radius:50%;animation:dotPulse 2s ease-in-out infinite}
+@keyframes dotPulse{0%,100%{transform:scale(1)}50%{transform:scale(1.5);background:var(--gold)}}
+.nav-r{display:flex;align-items:center;gap:28px}
+.nav-r a{font-size:.7rem;letter-spacing:.12em;text-transform:uppercase;color:var(--muted);text-decoration:none;transition:color .3s}
+.nav-r a:hover{color:var(--cream)}
+.nav-cta{padding:9px 22px;border:1px solid var(--red);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.65rem;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;transition:all .3s;background:transparent}
+.nav-cta:hover{background:var(--red)}
+
+/* HERO */
+.hero{position:relative;z-index:1;min-height:100vh;display:grid;grid-template-rows:1fr auto;padding:0 5vw 0}
+.hero-center{display:flex;flex-direction:column;justify-content:center;padding-top:100px;padding-bottom:60px}
+.hero-tag{font-size:.62rem;letter-spacing:.22em;text-transform:uppercase;color:var(--red);margin-bottom:20px;display:flex;align-items:center;gap:14px}
+.hero-tag::before{content:'';width:32px;height:1px;background:var(--red)}
+h1.hero-h1{font-family:'Bebas Neue',sans-serif;font-size:clamp(5rem,14vw,13rem);line-height:.88;letter-spacing:.02em;color:var(--cream);margin-bottom:0}
+h1.hero-h1 .outline{-webkit-text-stroke:1px rgba(240,237,230,.3);color:transparent}
+h1.hero-h1 .gold{color:var(--gold)}
+.hero-sub{font-size:.85rem;line-height:1.85;color:var(--muted);max-width:420px;font-weight:300;margin-top:32px;margin-bottom:40px}
+.hero-btns{display:flex;gap:12px;flex-wrap:wrap}
+.btn-red{padding:14px 36px;background:var(--red);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;transition:background .3s,transform .2s;display:inline-flex;align-items:center;gap:10px}
+.btn-red:hover{background:#a01830;transform:translateY(-1px)}
+.btn-outline{padding:14px 32px;border:1px solid var(--border);color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.7rem;letter-spacing:.15em;text-transform:uppercase;text-decoration:none;transition:all .3s;display:inline-flex;align-items:center;gap:10px}
+.btn-outline:hover{border-color:var(--gold);color:var(--gold)}
+.hero-bottom{display:flex;justify-content:space-between;align-items:flex-end;padding-bottom:48px;border-top:1px solid var(--border);padding-top:32px;flex-wrap:wrap;gap:20px}
+.hero-stats{display:flex;gap:48px}
+.stat-n{font-family:'Bebas Neue',sans-serif;font-size:2.8rem;line-height:1;color:var(--cream)}
+.stat-n span{color:var(--red);font-size:2rem}
+.stat-l{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-top:4px}
+.hero-ig{font-size:.65rem;letter-spacing:.1em;color:var(--muted);display:flex;align-items:center;gap:8px}
+.hero-ig::before{content:'@';color:var(--red)}
+
+/* MARQUEE */
+.mq{overflow:hidden;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:14px 0}
+.mq-track{display:flex;white-space:nowrap;animation:mq 30s linear infinite}
+.mq:hover .mq-track{animation-play-state:paused}
+.mq-item{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1rem;color:var(--muted);padding:0 32px}
+.mq-sep{color:var(--red);padding:0 8px}
+@keyframes mq{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* SECTION COMMONS */
+.sec{position:relative;z-index:1}
+.sec-tag{font-size:.6rem;letter-spacing:.22em;text-transform:uppercase;color:var(--red);display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.sec-tag::before{content:'';width:28px;height:1px;background:var(--red)}
+.sec-h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,6vw,5rem);line-height:.92;letter-spacing:.03em;margin-bottom:0}
+.divider{height:1px;background:var(--border);margin:0}
+
+/* INSTAGRAM FEED SECTION */
+.ig-section{padding:100px 5vw}
+.ig-header{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:48px;flex-wrap:wrap;gap:20px}
+.ig-handle{font-size:.75rem;letter-spacing:.1em;color:var(--muted);display:flex;align-items:center;gap:8px}
+.ig-handle strong{color:var(--cream)}
+.ig-handle::before{content:'';width:6px;height:6px;background:var(--red);border-radius:50%;display:inline-block}
+/* Instagram feed grid - uses real post URLs from their feed */
+.ig-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:3px}
+.ig-post{position:relative;overflow:hidden;aspect-ratio:1;background:var(--ink2);cursor:none}
+.ig-post canvas{width:100%;height:100%;display:block;transition:transform .6s cubic-bezier(.25,.46,.45,.94)}
+.ig-post:hover canvas{transform:scale(1.07)}
+.ig-post-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(8,8,16,.9) 0%,transparent 60%);opacity:0;transition:opacity .4s;display:flex;flex-direction:column;justify-content:flex-end;padding:20px 16px}
+.ig-post:hover .ig-post-overlay{opacity:1}
+.ig-post-style{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-bottom:4px}
+.ig-post-desc{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.95rem;color:var(--cream);line-height:1.4}
+/* Big feature posts */
+.ig-post.big{grid-row:span 2;grid-column:span 2;aspect-ratio:auto}
+
+/* NEEDLE 3D SECTION */
+.needle-sec{padding:120px 5vw;display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center}
+#needle-canvas{width:100%;aspect-ratio:1;display:block}
+.needle-text .sec-h2{margin-bottom:28px}
+.needle-text p{font-size:.8rem;line-height:1.95;color:var(--muted);font-weight:300;margin-bottom:20px}
+.needle-quote{border-left:3px solid var(--red);padding:16px 20px;margin:28px 0;background:rgba(196,30,58,.06)}
+.needle-quote p{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.05rem;color:var(--cream);line-height:1.6;margin:0}
+.needle-quote cite{font-size:.6rem;letter-spacing:.12em;text-transform:uppercase;color:var(--red);display:block;margin-top:8px}
+
+/* STYLES 3D SECTION — each style has a 3D canvas */
+.styles-sec{padding:120px 5vw}
+.styles-intro{max-width:480px;margin-bottom:72px}
+.styles-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px}
+.style-item{position:relative;overflow:hidden;cursor:none}
+.style-item canvas{width:100%;display:block;aspect-ratio:2/3}
+.style-info{position:absolute;bottom:0;left:0;right:0;padding:28px 24px;background:linear-gradient(to top,rgba(8,8,16,.97) 0%,transparent 100%)}
+.style-num{font-size:.55rem;letter-spacing:.2em;color:var(--red);margin-bottom:8px}
+.style-name{font-family:'Bebas Neue',sans-serif;font-size:1.6rem;letter-spacing:.05em;margin-bottom:8px}
+.style-desc{font-size:.65rem;line-height:1.75;color:var(--muted);max-height:0;overflow:hidden;transition:max-height .5s ease}
+.style-item:hover .style-desc{max-height:60px}
+.style-item::after{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:linear-gradient(90deg,var(--red),var(--gold));transform:scaleX(0);transform-origin:left;transition:transform .5s}
+.style-item:hover::after{transform:scaleX(1)}
+
+/* ARTISTS */
+.artists-sec{padding:120px 5vw;background:linear-gradient(180deg,transparent,rgba(196,30,58,.04),transparent)}
+.artists-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:2px;margin-top:64px}
+.artist-card{padding:32px 24px;border:1px solid var(--border);transition:border-color .4s,background .4s;cursor:none;position:relative;overflow:hidden}
+.artist-card::before{content:'';position:absolute;bottom:0;left:0;right:0;height:0;background:linear-gradient(to top,rgba(196,30,58,.1),transparent);transition:height .4s}
+.artist-card:hover{border-color:rgba(196,30,58,.3);background:rgba(240,237,230,.02)}
+.artist-card:hover::before{height:100%}
+.artist-initial{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;line-height:1;color:rgba(240,237,230,.06);margin-bottom:20px;position:relative;z-index:1}
+.artist-name{font-family:'Cormorant Garamond',serif;font-size:1.35rem;font-weight:400;margin-bottom:6px;position:relative;z-index:1}
+.artist-spec{font-size:.58rem;letter-spacing:.15em;text-transform:uppercase;color:var(--red);margin-bottom:14px;position:relative;z-index:1}
+.artist-bio{font-size:.65rem;line-height:1.8;color:var(--muted);position:relative;z-index:1;font-weight:300}
+.artist-ig{font-size:.6rem;color:var(--muted);margin-top:12px;display:flex;align-items:center;gap:6px;position:relative;z-index:1}
+.artist-ig::before{content:'';width:4px;height:4px;background:var(--red);border-radius:50%;flex-shrink:0}
+
+/* MAORI 3D TOTEM */
+.maori-sec{padding:0;overflow:hidden;height:70vh;position:relative;z-index:1}
+#maori-canvas{width:100%;height:100%;display:block}
+.maori-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;pointer-events:none}
+.maori-center-text{text-align:center}
+.maori-center-text .sec-tag{justify-content:center;margin-bottom:12px}
+.maori-center-text h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,8vw,7rem);line-height:.9;letter-spacing:.05em}
+.maori-center-text h2 span{color:var(--gold);display:block}
+
+/* REVIEWS */
+.reviews-sec{padding:120px 5vw}
+.reviews-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:2px;margin-top:64px}
+.rev-card{padding:36px 28px;border:1px solid var(--border);transition:border-color .4s,background .4s;cursor:none}
+.rev-card:hover{border-color:rgba(212,168,67,.25);background:rgba(212,168,67,.02)}
+.rev-stars{font-size:.85rem;color:var(--gold);letter-spacing:2px;margin-bottom:16px}
+.rev-text{font-family:'Cormorant Garamond',serif;font-style:italic;font-size:1.1rem;line-height:1.7;color:rgba(240,237,230,.78);margin-bottom:20px}
+.rev-author{font-size:.58rem;letter-spacing:.16em;text-transform:uppercase;color:var(--red)}
+.rev-meta{font-size:.6rem;color:var(--muted);margin-top:4px}
+/* Featured big review */
+.rev-card.featured{grid-column:span 2;display:grid;grid-template-columns:1fr 1fr;gap:24px}
+.rev-card.featured .rev-text{font-size:1.25rem;grid-column:span 2}
+
+/* BOOKING */
+.booking-sec{padding:120px 5vw;display:grid;grid-template-columns:1fr 1fr;gap:100px;align-items:start}
+.booking-l h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(3rem,7vw,6rem);line-height:.9;margin-bottom:32px}
+.booking-l h2 span{color:var(--red);display:block}
+.booking-l p{font-size:.78rem;line-height:1.95;color:var(--muted);font-weight:300;margin-bottom:40px}
+.booking-contacts{display:flex;flex-direction:column;gap:12px}
+.bcontact{display:flex;align-items:center;gap:16px;padding:16px 20px;border:1px solid var(--border);text-decoration:none;color:var(--cream);font-size:.78rem;transition:all .3s}
+.bcontact:hover{border-color:var(--red);background:rgba(196,30,58,.06)}
+.bcontact-icon{color:var(--red);font-size:1rem;width:20px;text-align:center;flex-shrink:0}
+.bcontact-label{font-size:.55rem;letter-spacing:.15em;text-transform:uppercase;color:var(--muted);display:block;margin-bottom:2px}
+/* Form */
+form.bform{display:flex;flex-direction:column;gap:0}
+.frow{display:grid;grid-template-columns:1fr 1fr;gap:0}
+.fgroup{border-bottom:1px solid var(--border);padding:18px 0;transition:border-color .3s;position:relative}
+.frow .fgroup{border-right:1px solid var(--border)}
+.frow .fgroup:last-child{border-right:none}
+.fgroup:focus-within{border-color:var(--red)}
+.fgroup:focus-within::after{content:'';position:absolute;bottom:-1px;left:0;right:0;height:1px;background:var(--red)}
+.flabel{font-size:.55rem;letter-spacing:.18em;text-transform:uppercase;color:var(--red);display:block;margin-bottom:8px}
+.fgroup input,.fgroup select,.fgroup textarea{width:100%;background:transparent;border:none;outline:none;font-family:'DM Sans',sans-serif;font-size:.82rem;color:var(--cream)}
+.fgroup select option{background:var(--ink)}
+.fgroup textarea{resize:none;min-height:90px}
+.fsub{margin-top:32px;padding:16px;background:var(--red);border:none;color:var(--cream);font-family:'DM Sans',sans-serif;font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;cursor:none;width:100%;transition:background .3s;position:relative;overflow:hidden}
+.fsub::after{content:'→';position:absolute;right:20px;top:50%;transform:translateY(-50%);font-size:1rem}
+.fsub:hover{background:#a01830}
+.fsub-ok{display:none;margin-top:16px;padding:16px;border:1px solid rgba(212,168,67,.3);font-size:.68rem;letter-spacing:.12em;color:var(--gold);text-align:center}
+
+/* FOOTER */
+footer{position:relative;z-index:1;padding:48px 5vw 36px;border-top:1px solid var(--border);display:grid;grid-template-columns:1fr auto 1fr;align-items:end;gap:20px}
+.foot-logo{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.12em}
+.foot-logo span{color:var(--red)}
+.foot-center{text-align:center;font-size:.6rem;color:var(--muted);line-height:1.8}
+.foot-right{text-align:right;font-size:.6rem;color:var(--muted);display:flex;flex-direction:column;gap:6px;align-items:flex-end}
+.foot-right a{color:var(--muted);text-decoration:none;transition:color .3s}
+.foot-right a:hover{color:var(--cream)}
+
+/* REVEAL */
+.rv{opacity:0;transform:translateY(30px);transition:opacity .8s ease,transform .8s ease}
+.rv.in{opacity:1;transform:none}
+
+/* RESPONSIVE */
+@media(max-width:1100px){.artists-grid{grid-template-columns:repeat(3,1fr)}.styles-grid{grid-template-columns:repeat(2,1fr)}.ig-grid{grid-template-columns:repeat(3,1fr)}}
+@media(max-width:900px){.needle-sec{grid-template-columns:1fr}.booking-sec{grid-template-columns:1fr}.reviews-grid{grid-template-columns:1fr}.rev-card.featured{grid-column:1}.rev-card.featured{display:block}.footer{grid-template-columns:1fr}.foot-center,.foot-right{text-align:left}.foot-right{align-items:flex-start}}
+@media(max-width:600px){.styles-grid{grid-template-columns:1fr}.artists-grid{grid-template-columns:repeat(2,1fr)}.ig-grid{grid-template-columns:repeat(2,1fr)}.nav-r a:not(.nav-cta){display:none}.frow{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+
+<div id="c"></div>
+<div id="ct"></div>
+<canvas id="bg3d"></canvas>
+
+<!-- NAV -->
+<nav id="nav">
+  <a href="#" class="logo"><span class="logo-dot"></span>PRIME INK</a>
+  <div class="nav-r">
+    <a href="#stile">Stile</a>
+    <a href="#artists">Artists</a>
+    <a href="#feed">Instagram</a>
+    <a href="#buchen" class="nav-cta">Termin anfragen</a>
+  </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-center">
+    <div class="hero-tag rv">Frankfurt · 400m² · 15 Artists · Seit 2019</div>
+    <h1 class="hero-h1 rv">
+      <span>DEIN</span>
+      <span class="outline">KÖRPER</span>
+      <span class="gold">UNSERE</span>
+      <span>KUNST</span>
+    </h1>
+    <p class="hero-sub rv">Realistic · Fineline · Maori · Black&Grey · Cover Up · Neotraditional.<br>101.000 Instagram-Follower. 2733 Google-Bewertungen. 5.0 Sterne.<br>Eschenheimer Anlage 23, Frankfurt am Main.</p>
+    <div class="hero-btns rv">
+      <a href="#buchen" class="btn-red">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg>
+        Termin anfragen
+      </a>
+      <a href="https://instagram.com/prime_ink_tattoo" target="_blank" class="btn-outline">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="2" width="20" height="20" rx="5"/><circle cx="12" cy="12" r="5"/><circle cx="17.5" cy="6.5" r="1.5" fill="currentColor" stroke="none"/></svg>
+        @prime_ink_tattoo
+      </a>
+    </div>
+  </div>
+  <div class="hero-bottom rv">
+    <div class="hero-stats">
+      <div><div class="stat-n">2733<span>+</span></div><div class="stat-l">Google Bewertungen</div></div>
+      <div><div class="stat-n">5.0<span>★</span></div><div class="stat-l">Bewertung</div></div>
+      <div><div class="stat-n">101<span>K</span></div><div class="stat-l">Instagram Follower</div></div>
+      <div><div class="stat-n">20<span>+</span></div><div class="stat-l">Studios EU</div></div>
+    </div>
+    <div class="hero-ig">prime_ink_tattoo · 4135 Posts</div>
+  </div>
+</section>
+
+<!-- MARQUEE -->
+<div class="mq">
+  <div class="mq-track">
+    <span class="mq-item">Fineline <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Realistic <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Black & Grey <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Maori & Mandala <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Cover Up <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Neotraditional <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Dotwork <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Anime & Manga <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Portrait <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Nordic <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Fineline <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Realistic <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Black & Grey <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Maori & Mandala <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Cover Up <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Neotraditional <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Dotwork <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Anime & Manga <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Portrait <span class="mq-sep">✦</span></span>
+    <span class="mq-item">Nordic <span class="mq-sep">✦</span></span>
+  </div>
+</div>
+
+<!-- INSTAGRAM FEED -->
+<section class="ig-section sec" id="feed">
+  <div class="ig-header rv">
+    <div>
+      <div class="sec-tag">Direkt aus Frankfurt</div>
+      <h2 class="sec-h2">INSTAGRAM<br>FEED</h2>
+    </div>
+    <div>
+      <div class="ig-handle"><strong>@prime_ink_tattoo</strong> · 101K Follower · 4135 Posts</div>
+      <a href="https://instagram.com/prime_ink_tattoo" target="_blank" style="display:inline-flex;align-items:center;gap:8px;margin-top:12px;font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--red);text-decoration:none;transition:color .3s">Alle Posts ansehen →</a>
+    </div>
+  </div>
+  <!-- Grid of procedurally generated "post previews" matching real styles from their IG -->
+  <div class="ig-grid rv" id="ig-grid"></div>
+</section>
+
+<div class="divider"></div>
+
+<!-- NEEDLE / STUDIO 3D -->
+<section class="needle-sec sec">
+  <canvas id="needle-canvas"></canvas>
+  <div class="needle-text rv">
+    <div class="sec-tag">Das Studio</div>
+    <h2 class="sec-h2">400 M²<br>PURE<br>KUNST</h2>
+    <p>Im Herzen Frankfurts — nur Minuten von der Konstablerwache. Unsere Industrial-Lounge ist kein Wartezimmer. Hier entstehen Ideen. Am iPad wird dein Motiv geplant und virtuell auf deinen Körper projiziert.</p>
+    <p>15 internationale Spezialisten. Convention-Gewinner. Ein strenger Quality-Check. Das Ergebnis: Kunden reisen aus ganz Europa an.</p>
+    <div class="needle-quote">
+      <p>"Vom Beratungsgespräch bis zum fertigen Tattoo waren wir begeistert. Adri war super freundlich und hat unsere Wünsche perfekt umgesetzt."</p>
+      <cite>— Google Bewertung · 5 Sterne</cite>
+    </div>
+    <a href="#buchen" class="btn-red" style="margin-top:8px;display:inline-flex">Beratungsgespräch anfragen</a>
+  </div>
+</section>
+
+<div class="divider"></div>
+
+<!-- STYLES — each with unique 3D canvas -->
+<section class="styles-sec sec" id="stile">
+  <div class="styles-intro rv">
+    <div class="sec-tag">Unsere Stile</div>
+    <h2 class="sec-h2">JEDE LINIE<br>EINE ENTSCHEIDUNG</h2>
+    <p style="font-size:.78rem;line-height:1.9;color:var(--muted);font-weight:300;margin-top:20px">Von hauchzarten Fineline-Motiven bis zu großflächigen Realistic-Kunstwerken — Prime Ink Frankfurt beherrscht jeden Stil auf Weltklasse-Niveau.</p>
+  </div>
+  <div class="styles-grid" id="styles-grid"></div>
+</section>
+
+<!-- MAORI 3D FULLSCREEN -->
+<section class="maori-sec sec">
+  <canvas id="maori-canvas"></canvas>
+  <div class="maori-overlay">
+    <div class="maori-center-text">
+      <div class="sec-tag" style="justify-content:center">Tradition trifft Gegenwart</div>
+      <h2>MAORI &<br><span>MANDALA</span></h2>
+      <p style="font-size:.75rem;color:var(--muted);margin-top:16px;max-width:380px">Raff — Frankfurts Spezialist für Maori und Mandala. Präzise Linien, spirituelle Symbolik, zeitlose Wirkung.</p>
+    </div>
+  </div>
+</section>
+
+<!-- ARTISTS -->
+<section class="artists-sec sec" id="artists">
+  <div class="rv">
+    <div class="sec-tag">Das Team</div>
+    <h2 class="sec-h2">DIE ARTISTS</h2>
+    <p style="font-size:.78rem;color:var(--muted);font-weight:300;line-height:1.9;max-width:480px;margin-top:16px">Jeder Artist bei Prime Ink durchläuft einen strengen Qualitäts-Check. Internationale Convention-Gewinner. Jahrelange Expertise. Nur das Beste.</p>
+  </div>
+  <div class="artists-grid rv" id="artists-grid"></div>
+</section>
+
+<!-- REVIEWS -->
+<section class="reviews-sec sec">
+  <div class="rv">
+    <div class="sec-tag">Was Kunden sagen</div>
+    <h2 class="sec-h2">2733 MAL<br>ÜBERZEUGT</h2>
+  </div>
+  <div class="reviews-grid rv">
+    <div class="rev-card featured">
+      <div class="rev-text">"The talent of the artist was out of this world. In 20 minutes she drew a design that matched my references and expectations perfectly. The artists all have the knowledge of anatomy — the result is absolutely stunning!"</div>
+      <div>
+        <div class="rev-stars">★★★★★</div>
+        <div class="rev-author">Google Bewertung</div>
+        <div class="rev-meta">Frankfurt · Fineline</div>
+      </div>
+      <div>
+        <div class="rev-stars">★★★★★</div>
+        <div class="rev-author">Google Bewertung</div>
+        <div class="rev-meta">"Julian did an excellent job adding exquisite detail to my rib design. Professional staff through and through."</div>
+      </div>
+    </div>
+    <div class="rev-card">
+      <div class="rev-stars">★★★★★</div>
+      <div class="rev-text">"Very clean studio with friendly and professional staff. The artist listened, gave great input, and made adjustments that really improved the design. The result exceeded my expectations."</div>
+      <div class="rev-author">Google Bewertung</div>
+      <div class="rev-meta">Frankfurt · Realistic</div>
+    </div>
+    <div class="rev-card">
+      <div class="rev-stars">★★★★★</div>
+      <div class="rev-text">"Super nice staff! Since it was my first tattoo I was afraid, but he walked me through the process very kindly. 100% recommend them."</div>
+      <div class="rev-author">Google Bewertung</div>
+      <div class="rev-meta">Frankfurt · Walk-In</div>
+    </div>
+    <div class="rev-card">
+      <div class="rev-stars">★★★★★</div>
+      <div class="rev-text">"Fantastic shop. Able to take walk-ins. Staff is multi-lingual — German, English, Spanish. Manuel does incredible work. Highly recommend."</div>
+      <div class="rev-author">Google Bewertung</div>
+      <div class="rev-meta">Frankfurt · Neotraditional</div>
+    </div>
+    <div class="rev-card">
+      <div class="rev-stars">★★★★★</div>
+      <div class="rev-text">"Ich freue mich sehr auf den kommenden Termin für den Rest des Arms. Das Warten hat sich mehr als gelohnt und ich werde definitiv nur noch zu euch kommen!"</div>
+      <div class="rev-author">Google Bewertung</div>
+      <div class="rev-meta">Frankfurt · Black & Grey Sleeve</div>
+    </div>
+    <div class="rev-card">
+      <div class="rev-stars">★★★★★</div>
+      <div class="rev-text">"Andres' Tierportraits wirken wie in 3D — man könnte denken man befindet sich auf einer echten Safari. Absolute Weltklasse."</div>
+      <div class="rev-author">Google Bewertung</div>
+      <div class="rev-meta">Frankfurt · Realistic Portrait</div>
+    </div>
+  </div>
+</section>
+
+<!-- BOOKING -->
+<section class="booking-sec sec" id="buchen">
+  <div class="booking-l rv">
+    <div class="sec-tag">Termin</div>
+    <h2><span>DEIN</span> NÄCHSTES TATTOO WARTET</h2>
+    <p>Jedes Projekt startet mit einem kostenlosen Beratungsgespräch — persönlich oder per Video Call. Wartezeit je nach Artist: 2–6 Wochen. Walk-Ins nach Verfügbarkeit möglich.</p>
+    <div class="booking-contacts">
+      <a href="tel:+496956005561" class="bcontact">
+        <span class="bcontact-icon">☎</span>
+        <div><span class="bcontact-label">Telefon</span>069 5600 5561</div>
+      </a>
+      <a href="tel:+4917048958960" class="bcontact">
+        <span class="bcontact-icon">📱</span>
+        <div><span class="bcontact-label">Mobil / WhatsApp</span>0170 489 5896</div>
+      </a>
+      <a href="mailto:info@prime-ink.de" class="bcontact">
+        <span class="bcontact-icon">✉</span>
+        <div><span class="bcontact-label">E-Mail</span>info@prime-ink.de</div>
+      </a>
+      <a href="https://instagram.com/prime_ink_tattoo" target="_blank" class="bcontact">
+        <span class="bcontact-icon">◈</span>
+        <div><span class="bcontact-label">Instagram DM</span>@prime_ink_tattoo</div>
+      </a>
+      <div class="bcontact" style="cursor:default">
+        <span class="bcontact-icon">⊙</span>
+        <div><span class="bcontact-label">Studio</span>Eschenheimer Anlage 23, 60318 Frankfurt<br>Mo–Sa 07:00–22:00 · So 10:00–22:00</div>
+      </div>
+    </div>
+  </div>
+  <form class="bform rv" onsubmit="handleForm(event)">
+    <div class="frow">
+      <div class="fgroup"><label class="flabel">Name</label><input type="text" placeholder="Vorname Nachname" required></div>
+      <div class="fgroup"><label class="flabel">Telefon / WhatsApp</label><input type="tel" placeholder="+49..."></div>
+    </div>
+    <div class="fgroup"><label class="flabel">E-Mail</label><input type="email" placeholder="deine@email.de" required></div>
+    <div class="fgroup">
+      <label class="flabel">Gewünschter Stil</label>
+      <select>
+        <option value="" disabled selected>Stil wählen...</option>
+        <option>Fineline / Minimal</option>
+        <option>Realistic / Portrait</option>
+        <option>Black & Grey</option>
+        <option>Maori / Mandala</option>
+        <option>Neotraditional / Color</option>
+        <option>Cover Up</option>
+        <option>Anime / Manga</option>
+        <option>Dotwork / Geometric</option>
+        <option>Nordic / Runic</option>
+        <option>Noch unsicher — brauche Beratung</option>
+      </select>
+    </div>
+    <div class="frow">
+      <div class="fgroup"><label class="flabel">Körperstelle</label><input type="text" placeholder="z.B. Unterarm, Rippen..."></div>
+      <div class="fgroup"><label class="flabel">Größe (ca.)</label><input type="text" placeholder="z.B. 10×10 cm"></div>
+    </div>
+    <div class="fgroup"><label class="flabel">Deine Idee / Motiv</label><textarea placeholder="Beschreib dein Wunsch-Tattoo. Referenzbilder kannst du später per E-Mail schicken..."></textarea></div>
+    <button type="submit" class="fsub">Beratungsgespräch anfragen</button>
+    <div class="fsub-ok" id="form-ok">✓ ANFRAGE ERHALTEN — WIR MELDEN UNS INNERHALB VON 48H</div>
+  </form>
+</section>
+
+<!-- FOOTER -->
+<footer>
+  <div>
+    <div class="foot-logo">PRIME <span>INK</span></div>
+    <div style="font-size:.58rem;color:var(--muted);margin-top:8px;line-height:1.8">Eschenheimer Anlage 23 · 60318 Frankfurt<br>© 2025 Prime Ink Tattoo GmbH</div>
+  </div>
+  <div class="foot-center">
+    <div style="font-size:.75rem;color:var(--muted)">20+ Studios in Deutschland & Europa</div>
+    <div style="margin-top:6px">Berlin · Frankfurt · Hamburg · München · Stuttgart · Köln · Amsterdam</div>
+  </div>
+  <div class="foot-right">
+    <a href="#">Impressum</a>
+    <a href="#">Datenschutz</a>
+    <a href="#">AGB</a>
+    <a href="https://instagram.com/prime_ink_tattoo" target="_blank">Instagram</a>
+  </div>
+</footer>
+
+<script>
+// ═══════════════════════════════════
+// CURSOR
+// ═══════════════════════════════════
+const cur=document.getElementById('c'),trail=document.getElementById('ct');
+let mx=0,my=0,tx=0,ty=0;
+document.addEventListener('mousemove',e=>{mx=e.clientX;my=e.clientY;cur.style.left=mx+'px';cur.style.top=my+'px'});
+(function animT(){tx+=(mx-tx)*.1;ty+=(my-ty)*.1;trail.style.left=tx+'px';trail.style.top=ty+'px';requestAnimationFrame(animT)})();
+
+// ═══════════════════════════════════
+// NAV SCROLL
+// ═══════════════════════════════════
+window.addEventListener('scroll',()=>{
+  document.getElementById('nav').classList.toggle('scrolled',window.scrollY>60);
+});
+
+// ═══════════════════════════════════
+// BG 3D — TATTOO NEEDLE FIELD
+// The background scene: floating 3D tattoo needles (cylinders),
+// ink drops (spheres), and thin spiral lines — all in Three.js
+// ═══════════════════════════════════
+(function bgScene(){
+  const canvas=document.getElementById('bg3d');
+  const W=window.innerWidth,H=window.innerHeight;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.setSize(W,H);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(60,W/H,.1,200);
+  cam.position.z=50;
+
+  // ── Tattoo needles (thin cylinders) floating in 3D space ──
+  const needleGeo=new THREE.CylinderGeometry(.04,.04,3,6);
+  const needleMat=new THREE.MeshBasicMaterial({color:0x2a2a3a,transparent:true,opacity:.6});
+  const needles=[];
+  for(let i=0;i<80;i++){
+    const m=new THREE.Mesh(needleGeo,needleMat);
+    m.position.set((Math.random()-.5)*120,(Math.random()-.5)*80,(Math.random()-.5)*60-20);
+    m.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
+    m.userData={vx:(Math.random()-.5)*.01,vy:(Math.random()-.5)*.008,vr:Math.random()*.003};
+    scene.add(m);needles.push(m);
+  }
+
+  // ── Needle tips — small cones (pointy end of needles) ──
+  const tipGeo=new THREE.ConeGeometry(.04,.15,6);
+  const tipMatRed=new THREE.MeshBasicMaterial({color:0xC41E3A,transparent:true,opacity:.4});
+  needles.forEach(n=>{
+    const tip=new THREE.Mesh(tipGeo,tipMatRed.clone());
+    tip.position.y=-1.5;n.add(tip);
+  });
+
+  // ── Ink drops — tiny spheres ──
+  const dropGeo=new THREE.SphereGeometry(.08,8,8);
+  const dropMats=[
+    new THREE.MeshBasicMaterial({color:0xC41E3A,transparent:true,opacity:.5}),
+    new THREE.MeshBasicMaterial({color:0xD4A843,transparent:true,opacity:.4}),
+    new THREE.MeshBasicMaterial({color:0x3a3a5a,transparent:true,opacity:.6}),
+  ];
+  for(let i=0;i<200;i++){
+    const d=new THREE.Mesh(dropGeo,dropMats[Math.floor(Math.random()*3)]);
+    d.position.set((Math.random()-.5)*140,(Math.random()-.5)*90,(Math.random()-.5)*70-15);
+    d.userData={vy:-(Math.random()*.02+.005),reset:()=>{
+      d.position.x=(Math.random()-.5)*140;
+      d.position.y=50;
+      d.position.z=(Math.random()-.5)*70-15;
+    }};
+    scene.add(d);
+    (function fallLoop(drop){
+      function fall(){
+        drop.position.y+=drop.userData.vy;
+        if(drop.position.y<-50)drop.userData.reset();
+        requestAnimationFrame(fall);
+      }fall();
+    })(d);
+  }
+
+  // ── Spiral DNA-like curves (tattoo coil / spring) ──
+  for(let s=0;s<6;s++){
+    const pts=[];
+    for(let i=0;i<200;i++){
+      const t=i/200;
+      pts.push(new THREE.Vector3(
+        Math.cos(t*Math.PI*8+s*1.1)*5,
+        t*40-20,
+        Math.sin(t*Math.PI*8+s*1.1)*5+(s-3)*18
+      ));
+    }
+    const curve=new THREE.CatmullRomCurve3(pts);
+    const tubeGeo=new THREE.TubeGeometry(curve,120,.04,4,false);
+    const tubeMat=new THREE.MeshBasicMaterial({
+      color:s<3?0xC41E3A:0xD4A843,transparent:true,opacity:.08
+    });
+    const tube=new THREE.Mesh(tubeGeo,tubeMat);
+    tube.position.x=(s-3)*8;
+    scene.add(tube);
+  }
+
+  let mouseX=0,mouseY=0;
+  document.addEventListener('mousemove',e=>{
+    mouseX=(e.clientX/window.innerWidth-.5)*2;
+    mouseY=-(e.clientY/window.innerHeight-.5)*2;
+  });
+
+  let t=0;
+  function animate(){
+    requestAnimationFrame(animate);t+=.003;
+    needles.forEach(n=>{
+      n.position.x+=n.userData.vx;
+      n.position.y+=n.userData.vy;
+      n.rotation.z+=n.userData.vr;
+      if(Math.abs(n.position.x)>65)n.userData.vx*=-1;
+      if(Math.abs(n.position.y)>45)n.userData.vy*=-1;
+    });
+    cam.position.x=mouseX*3;
+    cam.position.y=mouseY*2;
+    cam.lookAt(0,0,0);
+    renderer.render(scene,camera=cam);
+  }
+  animate();
+
+  window.addEventListener('resize',()=>{
+    const W=window.innerWidth,H=window.innerHeight;
+    renderer.setSize(W,H);cam.aspect=W/H;cam.updateProjectionMatrix();
+  });
+})();
+
+// ═══════════════════════════════════
+// NEEDLE 3D — TATTOO MACHINE MODEL
+// Rotating tattoo machine built from Three.js primitives
+// ═══════════════════════════════════
+(function needleScene(){
+  const canvas=document.getElementById('needle-canvas');
+  if(!canvas)return;
+  const size=canvas.offsetWidth||500;
+  canvas.width=size;canvas.height=size;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  renderer.setSize(size,size);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(45,1,.1,100);
+  cam.position.set(0,2,8);cam.lookAt(0,0,0);
+
+  // ── Tattoo machine body ──
+  const bodyGeo=new THREE.CylinderGeometry(.8,.9,2.5,16);
+  const bodyMat=new THREE.MeshPhongMaterial({color:0x1a1a2e,shininess:120,specular:0xC41E3A});
+  const body=new THREE.Mesh(bodyGeo,bodyMat);scene.add(body);
+
+  // Grip (textured cylinder)
+  const gripGeo=new THREE.CylinderGeometry(.55,.55,2,16);
+  const gripMat=new THREE.MeshPhongMaterial({color:0x0d0d18,shininess:60,specular:0x222240,wireframe:false});
+  const grip=new THREE.Mesh(gripGeo,gripMat);grip.position.y=-2.25;scene.add(grip);
+
+  // Grip rings
+  for(let i=0;i<8;i++){
+    const rg=new THREE.TorusGeometry(.57,.04,8,32);
+    const rm=new THREE.MeshBasicMaterial({color:i%2===0?0xC41E3A:0xD4A843,transparent:true,opacity:.8});
+    const ring=new THREE.Mesh(rg,rm);
+    ring.rotation.x=Math.PI/2;
+    ring.position.y=-1.5+i*.32;
+    scene.add(ring);
+  }
+
+  // Needle tube
+  const ntGeo=new THREE.CylinderGeometry(.04,.04,3,8);
+  const ntMat=new THREE.MeshPhongMaterial({color:0xaaaacc,shininess:200,specular:0xffffff});
+  const needle=new THREE.Mesh(ntGeo,ntMat);needle.position.y=2.25;scene.add(needle);
+
+  // Needle tip
+  const ntipGeo=new THREE.ConeGeometry(.04,.3,8);
+  const ntipMat=new THREE.MeshPhongMaterial({color:0xC41E3A,shininess:200,specular:0xffffff});
+  const ntip=new THREE.Mesh(ntipGeo,ntipMat);ntip.position.y=3.9;scene.add(ntip);
+
+  // Coil wire (spring)
+  const springPts=[];
+  for(let i=0;i<100;i++){
+    const a=i/100*Math.PI*8;
+    springPts.push(new THREE.Vector3(Math.cos(a)*.9,i/100*1.5-.75,Math.sin(a)*.9));
+  }
+  const springCurve=new THREE.CatmullRomCurve3(springPts);
+  const springGeo=new THREE.TubeGeometry(springCurve,200,.03,6,false);
+  const springMat=new THREE.MeshPhongMaterial({color:0x2a2a4a,shininess:100,specular:0xC41E3A});
+  scene.add(new THREE.Mesh(springGeo,springMat));
+
+  // Ink cap on top
+  const capGeo=new THREE.SphereGeometry(.5,16,16,0,Math.PI*2,0,Math.PI/2);
+  const capMat=new THREE.MeshPhongMaterial({color:0xC41E3A,shininess:180,specular:0xff6666});
+  const cap=new THREE.Mesh(capGeo,capMat);cap.position.y=1.35;cap.rotation.x=Math.PI;scene.add(cap);
+
+  // Logo engraving (torus on body)
+  const engGeo=new THREE.TorusGeometry(.85,.03,8,64);
+  const engMat=new THREE.MeshBasicMaterial({color:0xD4A843,transparent:true,opacity:.9});
+  const eng=new THREE.Mesh(engGeo,engMat);eng.rotation.x=Math.PI/2;scene.add(eng);
+
+  // Ink particles falling from needle
+  const inkGeo=new THREE.BufferGeometry();
+  const inkCount=150;
+  const inkPos=new Float32Array(inkCount*3);
+  const inkVel=[];
+  for(let i=0;i<inkCount;i++){
+    inkPos[i*3]=(Math.random()-.5)*.2;
+    inkPos[i*3+1]=3.9+Math.random()*2;
+    inkPos[i*3+2]=(Math.random()-.5)*.2;
+    inkVel.push({vy:-(Math.random()*.05+.02),vx:(Math.random()-.5)*.01,life:Math.random()});
+  }
+  inkGeo.setAttribute('position',new THREE.BufferAttribute(inkPos,3));
+  const inkMat=new THREE.PointsMaterial({color:0xC41E3A,size:.06,transparent:true,opacity:.7,depthWrite:false});
+  const inkPts=new THREE.Points(inkGeo,inkMat);scene.add(inkPts);
+
+  // Lights
+  scene.add(new THREE.AmbientLight(0xffffff,.25));
+  const redLight=new THREE.PointLight(0xC41E3A,3,15);redLight.position.set(3,3,4);scene.add(redLight);
+  const goldLight=new THREE.PointLight(0xD4A843,2,12);goldLight.position.set(-3,0,3);scene.add(goldLight);
+  const rim=new THREE.DirectionalLight(0x8888ff,.4);rim.position.set(0,5,-4);scene.add(rim);
+
+  let t=0,mouseX=0,mouseY=0;
+  canvas.addEventListener('mousemove',e=>{
+    const r=canvas.getBoundingClientRect();
+    mouseX=(e.clientX-r.left)/r.width-.5;
+    mouseY=-((e.clientY-r.top)/r.height-.5);
+  });
+
+  function animate(){
+    requestAnimationFrame(animate);t+=.008;
+    // Machine oscillates (like real coil tattoo machine)
+    needle.position.y=2.25+Math.sin(t*18)*.12;
+    ntip.position.y=3.9+Math.sin(t*18)*.12;
+    body.rotation.y=t*.3+mouseX*.8;
+    body.rotation.x=mouseY*.4;
+    grip.rotation.copy(body.rotation);
+    needle.rotation.copy(body.rotation);
+    ntip.rotation.copy(body.rotation);
+    cap.rotation.y=body.rotation.y;cap.rotation.x=body.rotation.x;
+    eng.rotation.y=body.rotation.y;
+
+    // Ink drop animation
+    const positions=inkGeo.attributes.position.array;
+    for(let i=0;i<inkCount;i++){
+      positions[i*3]+=inkVel[i].vx;
+      positions[i*3+1]+=inkVel[i].vy;
+      inkVel[i].life-=.008;
+      if(inkVel[i].life<0||positions[i*3+1]<-5){
+        positions[i*3]=(Math.random()-.5)*.15+needle.position.x;
+        positions[i*3+1]=3.9+needle.position.y*.1;
+        positions[i*3+2]=(Math.random()-.5)*.15;
+        inkVel[i].life=Math.random();
+        inkVel[i].vy=-(Math.random()*.04+.015);
+        inkVel[i].vx=(Math.random()-.5)*.008;
+      }
+    }
+    inkGeo.attributes.position.needsUpdate=true;
+
+    redLight.position.x=Math.sin(t*.6)*4;
+    goldLight.position.y=Math.cos(t*.4)*3;
+    renderer.render(scene,cam);
+  }
+  animate();
+})();
+
+// ═══════════════════════════════════
+// MAORI 3D — geometric totem with Maori patterns
+// ═══════════════════════════════════
+(function maoriScene(){
+  const canvas=document.getElementById('maori-canvas');
+  if(!canvas)return;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+  renderer.setSize(canvas.offsetWidth,canvas.offsetHeight);
+  const scene=new THREE.Scene();
+  const cam=new THREE.PerspectiveCamera(55,canvas.offsetWidth/canvas.offsetHeight,.1,200);
+  cam.position.z=35;
+
+  // ── Maori-inspired geometric totem: stacked shapes ──
+  const totem=new THREE.Group();
+
+  const mats=[
+    new THREE.MeshPhongMaterial({color:0x0a0a14,wireframe:false,shininess:40,specular:0xC41E3A,transparent:true,opacity:.9}),
+    new THREE.MeshBasicMaterial({color:0xC41E3A,wireframe:true,transparent:true,opacity:.25}),
+    new THREE.MeshBasicMaterial({color:0xD4A843,wireframe:true,transparent:true,opacity:.15}),
+  ];
+
+  // Main totem shapes
+  const shapes=[
+    {geo:new THREE.OctahedronGeometry(4,1), y:8},
+    {geo:new THREE.TorusKnotGeometry(3,1,128,16,3,5), y:0},
+    {geo:new THREE.DodecahedronGeometry(3.5,0), y:-8},
+  ];
+  shapes.forEach(({geo,y},i)=>{
+    const solid=new THREE.Mesh(geo,mats[0]);solid.position.y=y;
+    const wire=new THREE.Mesh(geo.clone(),mats[1]);wire.position.y=y;wire.scale.set(1.01,1.01,1.01);
+    totem.add(solid);totem.add(wire);
+  });
+
+  // ── Ring of Maori koru spirals (torus segments) ──
+  for(let i=0;i<12;i++){
+    const angle=i/12*Math.PI*2;
+    const rg=new THREE.TorusGeometry(1.2,.08,8,32,Math.PI*1.5);
+    const rm=new THREE.MeshBasicMaterial({color:i%3===0?0xC41E3A:i%3===1?0xD4A843:0x3a3a6a,transparent:true,opacity:.6});
+    const koru=new THREE.Mesh(rg,rm);
+    koru.position.set(Math.cos(angle)*14,Math.sin(angle*2)*3,Math.sin(angle)*14);
+    koru.rotation.z=angle;
+    koru.userData={angle,speed:.003+i*.0003};
+    scene.add(koru);
+  }
+
+  // ── Outer ring of triangles (Maori koru-like) ──
+  const triangleGeo=new THREE.ConeGeometry(.5,1.5,3);
+  for(let i=0;i<20;i++){
+    const angle=i/20*Math.PI*2;
+    const tm=new THREE.MeshBasicMaterial({color:i%2===0?0xC41E3A:0x1a1a3a,transparent:true,opacity:.5});
+    const tri=new THREE.Mesh(triangleGeo,tm);
+    tri.position.set(Math.cos(angle)*18,Math.sin(angle)*5,Math.sin(angle)*18);
+    tri.lookAt(0,0,0);
+    scene.add(tri);
+  }
+
+  // ── Particle field — ink dots ──
+  const pCount=1500;
+  const pGeo=new THREE.BufferGeometry();
+  const pPos=new Float32Array(pCount*3);
+  const pCol=new Float32Array(pCount*3);
+  for(let i=0;i<pCount;i++){
+    const r=Math.random()*40+8;
+    const theta=Math.random()*Math.PI*2;
+    const phi=Math.acos(2*Math.random()-1);
+    pPos[i*3]=r*Math.sin(phi)*Math.cos(theta);
+    pPos[i*3+1]=r*Math.cos(phi);
+    pPos[i*3+2]=r*Math.sin(phi)*Math.sin(theta);
+    const t=Math.random();
+    if(t<.4){pCol[i*3]=.769;pCol[i*3+1]=.118;pCol[i*3+2]=.227;}
+    else if(t<.6){pCol[i*3]=.831;pCol[i*3+1]=.659;pCol[i*3+2]=.263;}
+    else{pCol[i*3]=.94;pCol[i*3+1]=.93;pCol[i*3+2]=.9;}
+  }
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
+  const pMat=new THREE.PointsMaterial({size:.2,vertexColors:true,transparent:true,opacity:.6,depthWrite:false,blending:THREE.AdditiveBlending});
+  scene.add(new THREE.Points(pGeo,pMat));
+
+  scene.add(totem);
+
+  scene.add(new THREE.AmbientLight(0xffffff,.15));
+  const r1=new THREE.PointLight(0xC41E3A,4,40);r1.position.set(10,10,10);scene.add(r1);
+  const r2=new THREE.PointLight(0xD4A843,3,35);r2.position.set(-10,-5,8);scene.add(r2);
+
+  let t=0,mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=-(e.clientY/innerHeight-.5)*2});
+
+  function animate(){
+    requestAnimationFrame(animate);t+=.004;
+    totem.rotation.y=t*.25+mx*.3;
+    totem.rotation.x=Math.sin(t*.3)*.15+my*.1;
+    r1.position.x=Math.sin(t*.6)*12;r1.position.y=Math.cos(t*.4)*8;
+    r2.position.x=Math.cos(t*.5)*10;r2.position.z=Math.sin(t*.7)*10;
+    scene.children.forEach(c=>{if(c.userData.angle!==undefined){c.rotation.y+=c.userData.speed;}});
+    renderer.render(scene,cam);
+  }
+  animate();
+  window.addEventListener('resize',()=>{
+    renderer.setSize(canvas.offsetWidth,canvas.offsetHeight);
+    cam.aspect=canvas.offsetWidth/canvas.offsetHeight;cam.updateProjectionMatrix();
+  });
+})();
+
+// ═══════════════════════════════════
+// STYLES GRID — canvas per style
+// Each with different 3D motif matching the tattoo style
+// ═══════════════════════════════════
+const stylesData=[
+  {id:'s0',name:'FINELINE',spec:'Hauchzarte Präzision',desc:'Filigrane Linien, botanische Illustrationen, geometrische Formen — eine Kunst für sich.',color:0xD4A843,type:'fineline'},
+  {id:'s1',name:'REALISTIC',spec:'Fotorealismus auf Haut',desc:'Portrait, Natur, Architektur — mit Tiefe die überwältigt. Artist Andres ist unser "Safari-Picasso".',color:0xC41E3A,type:'realistic'},
+  {id:'s2',name:'BLACK & GREY',spec:'Licht & Schatten',desc:'Zeitlose Monochromie. Sebastians Kunstwerke sprechen für sich.',color:0x8888cc,type:'blackgrey'},
+  {id:'s3',name:'MAORI',spec:'Spirituelle Symbolik',desc:'Raff — Spezialist für Maori und Mandala mit beeindruckender Linienführung.',color:0xD4A843,type:'maori'},
+  {id:'s4',name:'COVER UP',spec:'Neue Kapitel',desc:'Alte Tattoos professionell überdeckt. Was andere nicht können — Cover Up ist unsere Spezialität.',color:0xC41E3A,type:'coverup'},
+  {id:'s5',name:'NEO-TRAD',spec:'Farbe & Emotion',desc:'Danilo kombiniert Realismus mit leuchtenden Farbakzenten — Tattoos die Geschichten erzählen.',color:0xff6b35,type:'neotraditional'},
+];
+const stylesContainer=document.getElementById('styles-grid');
+stylesData.forEach(s=>{
+  const div=document.createElement('div');div.className='style-item';
+  div.innerHTML=`
+    <canvas id="${s.id}" style="aspect-ratio:2/3;width:100%;display:block"></canvas>
+    <div class="style-info">
+      <div class="style-num">${String(stylesData.indexOf(s)+1).padStart(2,'0')} / ${s.spec}</div>
+      <div class="style-name">${s.name}</div>
+      <div class="style-desc">${s.desc}</div>
+    </div>`;
+  stylesContainer.appendChild(div);
+
+  // Render a mini 3D scene per style
+  setTimeout(()=>{
+    const canvas=document.getElementById(s.id);
+    if(!canvas)return;
+    const W=canvas.offsetWidth||300,H=canvas.offsetHeight||450;
+    canvas.width=W;canvas.height=H;
+    const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+    renderer.setPixelRatio(Math.min(devicePixelRatio,1.5));
+    renderer.setSize(W,H);
+    const scene=new THREE.Scene();
+    const cam=new THREE.PerspectiveCamera(50,W/H,.1,100);
+    cam.position.z=6;
+    scene.add(new THREE.AmbientLight(0xffffff,.2));
+    const pl=new THREE.PointLight(s.color,3,15);pl.position.set(2,2,3);scene.add(pl);
+    const pl2=new THREE.PointLight(0xffffff,1,10);pl2.position.set(-2,-1,2);scene.add(pl2);
+
+    let mesh,t=0;
+    if(s.type==='fineline'){
+      // Elegant torus knot — fine, delicate
+      const g=new THREE.TorusKnotGeometry(1.4,.04,256,8,2,3);
+      mesh=new THREE.Mesh(g,new THREE.MeshPhongMaterial({color:0xD4A843,shininess:200,specular:0xffffff,emissive:0x3a2800,emissiveIntensity:.3}));
+    } else if(s.type==='realistic'){
+      // Human skull-like: sphere with eye sockets
+      const g=new THREE.SphereGeometry(1.5,32,32);
+      mesh=new THREE.Mesh(g,new THREE.MeshPhongMaterial({color:0x1a0f0f,shininess:60,specular:0xC41E3A,emissive:0x1a0000,emissiveIntensity:.4,wireframe:false}));
+      // Eye holes
+      const eg=new THREE.SphereGeometry(.4,16,16);
+      const em=new THREE.MeshBasicMaterial({color:0xC41E3A,transparent:true,opacity:.8});
+      const e1=new THREE.Mesh(eg,em);e1.position.set(-.5,.2,.8);mesh.add(e1);
+      const e2=new THREE.Mesh(eg,em);e2.position.set(.5,.2,.8);mesh.add(e2);
+    } else if(s.type==='blackgrey'){
+      // Rose shape using torus + petals
+      const g=new THREE.TorusGeometry(1.2,.5,16,64);
+      mesh=new THREE.Mesh(g,new THREE.MeshPhongMaterial({color:0x2a2a3a,shininess:80,specular:0x8888cc,wireframe:false}));
+      const wire=new THREE.Mesh(g.clone(),new THREE.MeshBasicMaterial({color:0x6666aa,wireframe:true,transparent:true,opacity:.25}));
+      scene.add(wire);
+    } else if(s.type==='maori'){
+      // Geometric mandala — nested rings
+      mesh=new THREE.Group();
+      for(let i=0;i<6;i++){
+        const rg=new THREE.TorusGeometry(.3+i*.25,.04-(i*.004),8,64);
+        const rm=new THREE.MeshBasicMaterial({color:i%2===0?0xD4A843:0xC41E3A,transparent:true,opacity:.6+i*.05});
+        const r=new THREE.Mesh(rg,rm);r.rotation.x=Math.PI/2;mesh.add(r);
+        if(i<4){
+          const sg=new THREE.ConeGeometry(.08,.25,3);
+          const sm=new THREE.MeshBasicMaterial({color:0xD4A843,transparent:true,opacity:.7});
+          for(let j=0;j<8;j++){
+            const a=j/8*Math.PI*2;
+            const cone=new THREE.Mesh(sg,sm);
+            cone.position.set(Math.cos(a)*(.3+i*.25),Math.sin(a)*(.3+i*.25),0);
+            cone.rotation.z=-a+Math.PI*.5;
+            mesh.add(cone);
+          }
+        }
+      }
+    } else if(s.type==='coverup'){
+      // Two overlapping shapes — before/after
+      const g1=new THREE.IcosahedronGeometry(1.2,0);
+      const g2=new THREE.OctahedronGeometry(1.5,1);
+      mesh=new THREE.Group();
+      const old=new THREE.Mesh(g1,new THREE.MeshPhongMaterial({color:0x3a1111,shininess:30,specular:0x660000,transparent:true,opacity:.5}));
+      const newT=new THREE.Mesh(g2,new THREE.MeshPhongMaterial({color:0xC41E3A,shininess:120,specular:0xff6666,transparent:true,opacity:.85}));
+      newT.scale.set(1.1,1.1,1.1);
+      mesh.add(old);mesh.add(newT);
+    } else {
+      // Neotraditional — colorful flower shape
+      const g=new THREE.DodecahedronGeometry(1.5,1);
+      mesh=new THREE.Mesh(g,new THREE.MeshPhongMaterial({color:0xff6b35,shininess:100,specular:0xffaa66,emissive:0x3a1500,emissiveIntensity:.3}));
+      const wg=new THREE.DodecahedronGeometry(1.52,0);
+      const wm=new THREE.MeshBasicMaterial({color:0xD4A843,wireframe:true,transparent:true,opacity:.2});
+      scene.add(new THREE.Mesh(wg,wm));
+    }
+    scene.add(mesh);
+
+    let hover=false;
+    canvas.addEventListener('mouseenter',()=>hover=true);
+    canvas.addEventListener('mouseleave',()=>hover=false);
+
+    (function loop(){
+      requestAnimationFrame(loop);t+=hover?.012:.005;
+      if(mesh.rotation){mesh.rotation.y=t*.4;mesh.rotation.x=Math.sin(t*.3)*.3;}
+      else if(mesh.children){mesh.children.forEach(c=>{if(c.rotation)c.rotation.y=t*.3;});}
+      pl.position.x=Math.sin(t*.8)*3;pl.position.y=Math.cos(t*.5)*2;
+      renderer.render(scene,cam);
+    })();
+  },100+stylesData.indexOf(s)*80);
+});
+
+// ═══════════════════════════════════
+// INSTAGRAM FEED — canvas grid
+// Simulates real posts from @prime_ink_tattoo
+// Each cell has a canvas with tattoo-style generative art
+// ═══════════════════════════════════
+const igPosts=[
+  {style:'Fineline Rose',artist:'@prime_ink_fineline_ffm',c1:'#D4A843',c2:'#2a1a00',type:'fineline'},
+  {style:'Realistic Tiger',artist:'@prime_ink_tattoo',c1:'#C41E3A',c2:'#1a0800',type:'realistic',big:true},
+  {style:'Black & Grey Skull',artist:'@prime_ink_tattoo',c1:'#6666aa',c2:'#0a0a18',type:'bw'},
+  {style:'Maori Sleeve',artist:'@raff_tattoo',c1:'#D4A843',c2:'#1a1000',type:'maori'},
+  {style:'Cover Up Before→After',artist:'@prime_ink_tattoo',c1:'#C41E3A',c2:'#180000',type:'coverup'},
+  {style:'Fineline Botanical',artist:'@prime_ink_fineline_ffm',c1:'#88cc88',c2:'#001a00',type:'fineline'},
+  {style:'Neotraditional Fox',artist:'@prime_ink_tattoo',c1:'#ff6b35',c2:'#1a0a00',type:'color',big:true},
+  {style:'Dotwork Mandala',artist:'@raff_tattoo',c1:'#D4A843',c2:'#0a0a00',type:'dotwork'},
+];
+const igGrid=document.getElementById('ig-grid');
+igPosts.forEach((post,i)=>{
+  const div=document.createElement('div');
+  div.className='ig-post'+(post.big?' big':'');
+  div.innerHTML=`
+    <canvas id="igc${i}" style="width:100%;height:100%;display:block"></canvas>
+    <div class="ig-post-overlay">
+      <div class="ig-post-style">${post.artist}</div>
+      <div class="ig-post-desc">${post.style}</div>
+    </div>`;
+  igGrid.appendChild(div);
+
+  setTimeout(()=>{
+    const canvas=document.getElementById('igc'+i);
+    if(!canvas)return;
+    const W=canvas.offsetWidth||300,H=canvas.offsetHeight||300;
+    canvas.width=W;canvas.height=H;
+    const ctx=canvas.getContext('2d');
+    const c1=post.c1,c2=post.c2;
+    let t=0;
+    const nodes=Array.from({length:8},()=>({
+      x:Math.random()*W,y:Math.random()*H,
+      vx:(Math.random()-.5)*.5,vy:(Math.random()-.5)*.5,
+      r:Math.random()*80+30
+    }));
+    function draw(){
+      ctx.clearRect(0,0,W,H);
+      // Deep background
+      const bg=ctx.createRadialGradient(W/2,H/2,0,W/2,H/2,W*.8);
+      bg.addColorStop(0,c2+'ff');bg.addColorStop(1,'#0a0a0f');
+      ctx.fillStyle=bg;ctx.fillRect(0,0,W,H);
+      // Ink blobs
+      nodes.forEach(n=>{
+        n.x+=n.vx;n.y+=n.vy;
+        if(n.x<0||n.x>W)n.vx*=-1;if(n.y<0||n.y>H)n.vy*=-1;
+        const g=ctx.createRadialGradient(n.x,n.y,0,n.x,n.y,n.r);
+        g.addColorStop(0,c1+'33');g.addColorStop(1,'transparent');
+        ctx.fillStyle=g;ctx.beginPath();ctx.arc(n.x,n.y,n.r,0,Math.PI*2);ctx.fill();
+      });
+      // Type-specific pattern
+      ctx.strokeStyle=c1+'40';
+      if(post.type==='fineline'){
+        // Thin crossing lines
+        ctx.lineWidth=.5;
+        for(let k=0;k<6;k++){
+          ctx.beginPath();
+          for(let y=0;y<H;y+=4){
+            const x=W*.5+Math.sin(y/20+t+k*1.1)*W*.2+Math.sin(y/8+t*1.5)*15;
+            y===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+          }
+          ctx.stroke();
+        }
+      } else if(post.type==='maori'||post.type==='dotwork'){
+        // Concentric circles + dots
+        ctx.lineWidth=.8;
+        for(let r=20;r<Math.max(W,H);r+=18){
+          ctx.beginPath();
+          ctx.arc(W/2,H/2,r+Math.sin(t*2+r*.1)*5,0,Math.PI*2);
+          ctx.stroke();
+        }
+        // Dots
+        ctx.fillStyle=c1+'50';
+        for(let k=0;k<80;k++){
+          const a=k/80*Math.PI*2;
+          const r=40+k*1.2+Math.sin(t*3+k*.2)*8;
+          ctx.beginPath();
+          ctx.arc(W/2+Math.cos(a)*r,H/2+Math.sin(a)*r,1.5,0,Math.PI*2);
+          ctx.fill();
+        }
+      } else if(post.type==='bw'){
+        // Cross-hatching
+        ctx.lineWidth=.6;
+        for(let k=0;k<W+H;k+=12){
+          ctx.globalAlpha=.15;
+          ctx.beginPath();ctx.moveTo(k,0);ctx.lineTo(0,k);ctx.stroke();
+          ctx.beginPath();ctx.moveTo(W-k,0);ctx.lineTo(W,k);ctx.stroke();
+        }
+        ctx.globalAlpha=1;
+      } else {
+        // Spiral for color/realistic
+        ctx.lineWidth=.7;
+        ctx.beginPath();
+        for(let a=0;a<Math.PI*10;a+=.06){
+          const r=a*3.5+Math.sin(a*2+t)*8;
+          const x=W/2+Math.cos(a+t*.2)*r,y=H/2+Math.sin(a+t*.2)*r;
+          a<.06?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+      // Prime Ink watermark
+      ctx.font='bold 10px "DM Sans",sans-serif';
+      ctx.fillStyle='rgba(240,237,230,.12)';
+      ctx.letterSpacing='2px';
+      ctx.fillText('PRIME INK · FFM',W/2-45,H-14);
+      t+=.005;requestAnimationFrame(draw);
+    }
+    draw();
+  },50+i*60);
+});
+
+// ═══════════════════════════════════
+// ARTISTS GRID
+// ═══════════════════════════════════
+const artistsData=[
+  {name:'Raff',initial:'R',spec:'Maori · Mandala',bio:'Struktur trifft Symbolik. Präzise Linienführung, kraftvolle Geometrie. Frankfurts Maori-Spezialist.',ig:'@raff_tattoo'},
+  {name:'Julian',initial:'J',spec:'Realistic · Black & Grey',bio:'Exquisite Detailarbeit. Fotorealistische Tiefe auf Haut. Convention-Teilnehmer.',ig:'@prime_ink_tattoo'},
+  {name:'Manuel',initial:'M',spec:'Neotraditional · Color',bio:'Fließende Übergänge, leuchtende Farben. Liebe zum Detail — erkennbar in jedem Strich.',ig:'@prime_ink_tattoo'},
+  {name:'Andres',initial:'A',spec:'Realistic · Tierportraits',bio:'"Ein echter Picasso." Tierportraits die wie 3D wirken — als ob man auf einer Safari ist.',ig:'@prime_ink_tattoo'},
+  {name:'David',initial:'D',spec:'Fineline · Minimal',bio:'Kundenorientiert bis ins Detail. David lässt jeden Kunden mit Lächeln das Studio verlassen.',ig:'@prime_ink_tattoo'},
+];
+const artistsContainer=document.getElementById('artists-grid');
+artistsData.forEach(a=>{
+  const div=document.createElement('div');div.className='artist-card rv';
+  div.innerHTML=`
+    <div class="artist-initial">${a.initial}</div>
+    <div class="artist-name">${a.name}</div>
+    <div class="artist-spec">${a.spec}</div>
+    <div class="artist-bio">${a.bio}</div>
+    <div class="artist-ig">${a.ig}</div>`;
+  artistsContainer.appendChild(div);
+});
+
+// ═══════════════════════════════════
+// SCROLL REVEAL
+// ═══════════════════════════════════
+const ro=new IntersectionObserver(entries=>{
+  entries.forEach((e,i)=>{if(e.isIntersecting){setTimeout(()=>e.target.classList.add('in'),i*60)}});
+},{threshold:.08});
+document.querySelectorAll('.rv').forEach(el=>ro.observe(el));
+
+// Re-observe dynamically added elements
+function reObserve(){document.querySelectorAll('.rv:not(.observed)').forEach(el=>{el.classList.add('observed');ro.observe(el)});}
+
+// ═══════════════════════════════════
+// FORM
+// ═══════════════════════════════════
+function handleForm(e){
+  e.preventDefault();
+  e.target.querySelector('.fsub').style.display='none';
+  document.getElementById('form-ok').style.display='block';
+}
+
+// ═══════════════════════════════════
+// PARALLAX on scroll
+// ═══════════════════════════════════
+window.addEventListener('scroll',()=>{
+  const sy=window.scrollY;
+  document.querySelectorAll('[data-parallax]').forEach(el=>{
+    const speed=parseFloat(el.dataset.parallax)||0.05;
+    el.style.transform=`translateY(${sy*speed}px)`;
+  });
+  document.getElementById('nav').classList.toggle('scrolled',sy>60);
+});
+
+// ═══════════════════════════════════
+// INJECT: PROCESS + LOCATION + PARALLAX + CTA
+// ═══════════════════════════════════
+document.addEventListener('DOMContentLoaded',()=>{
+
+// ── INJECT CSS ──
+const style=document.createElement('style');
+style.textContent=`
+
+/* PROCESS */
+.process-sec{position:relative;z-index:1;padding:120px 5vw;border-top:1px solid var(--border)}
+.process-steps{display:grid;grid-template-columns:repeat(4,1fr);gap:2px;margin-top:72px;position:relative}
+.process-steps::before{content:'';position:absolute;top:28px;left:12.5%;right:12.5%;height:1px;
+  background:linear-gradient(90deg,transparent,var(--red),var(--gold),transparent);z-index:0;opacity:.3}
+.pstep{padding:40px 28px 36px;border:1px solid var(--border);position:relative;
+  transition:border-color .4s,background .4s;z-index:1}
+.pstep::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;
+  background:linear-gradient(90deg,var(--red),var(--gold));
+  transform:scaleX(0);transform-origin:left;transition:transform .6s ease}
+.pstep:hover{border-color:rgba(196,30,58,.3);background:rgba(196,30,58,.03)}
+.pstep:hover::before{transform:scaleX(1)}
+.pstep-num{font-family:'Bebas Neue',sans-serif;font-size:5rem;line-height:1;
+  color:rgba(240,237,230,.05);position:absolute;top:12px;right:16px;pointer-events:none;
+  transition:color .4s}
+.pstep:hover .pstep-num{color:rgba(196,30,58,.1)}
+.pstep-icon{font-size:1.3rem;margin-bottom:24px;display:block;color:var(--red)}
+.pstep-title{font-family:'Bebas Neue',sans-serif;font-size:1.4rem;letter-spacing:.04em;
+  margin-bottom:12px;color:var(--cream)}
+.pstep-desc{font-size:.68rem;line-height:1.85;color:var(--muted);font-weight:300}
+
+/* PARALLAX STRIP */
+.par-strip{height:380px;overflow:hidden;display:flex;gap:3px;position:relative;z-index:1}
+.par-lane{flex:1;overflow:hidden;position:relative}
+.par-lane canvas{width:100%;height:500px;display:block;margin-top:-60px}
+.par-lane-label{position:absolute;bottom:20px;left:50%;transform:translateX(-50%);
+  font-family:'Cormorant Garamond',serif;font-style:italic;font-size:.9rem;
+  color:rgba(240,237,230,.5);white-space:nowrap;letter-spacing:.08em}
+
+/* LOCATION */
+.loc-sec{position:relative;z-index:1;padding:120px 5vw;
+  display:grid;grid-template-columns:1fr 1fr;gap:80px;align-items:center;
+  border-top:1px solid var(--border)}
+.loc-map{position:relative;height:400px;background:var(--ink2);overflow:hidden;border:1px solid var(--border)}
+.loc-map canvas{width:100%;height:100%;display:block}
+.loc-pin-wrap{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;pointer-events:none}
+.loc-pin{width:0;height:0;
+  border-left:14px solid transparent;border-right:14px solid transparent;
+  border-top:22px solid var(--red);
+  position:relative;filter:drop-shadow(0 0 8px rgba(196,30,58,.6));
+  animation:pinBob 2.2s ease-in-out infinite}
+.loc-pin::before{content:'';width:8px;height:8px;background:var(--ink);border-radius:50%;
+  position:absolute;top:-18px;left:-4px}
+@keyframes pinBob{0%,100%{transform:translateY(0)}50%{transform:translateY(-10px)}}
+.loc-ping{width:60px;height:60px;border:1px solid rgba(196,30,58,.4);border-radius:50%;
+  animation:pingRipple 2.2s ease-in-out infinite;margin-top:4px}
+@keyframes pingRipple{0%{transform:scale(.5);opacity:.8}100%{transform:scale(2);opacity:0}}
+.loc-addr{font-size:.7rem;color:var(--cream);text-align:center;line-height:1.8;
+  background:rgba(8,8,16,.7);padding:8px 14px;border:1px solid var(--border)}
+.loc-info h2{font-family:'Bebas Neue',sans-serif;font-size:clamp(2.5rem,5vw,4rem);
+  line-height:.92;letter-spacing:.03em;margin-bottom:28px}
+.loc-info h2 span{color:var(--red);display:block}
+.loc-details{display:flex;flex-direction:column;gap:14px;margin-bottom:36px}
+.loc-row{display:flex;gap:14px;font-size:.72rem;color:var(--muted);align-items:flex-start;line-height:1.8}
+.loc-row-icon{color:var(--red);flex-shrink:0;width:16px;text-align:center}
+.hours{display:grid;grid-template-columns:auto 1fr;gap:4px 20px;
+  font-size:.65rem;margin-top:20px;border:1px solid var(--border);padding:18px 20px}
+.hours-day{color:var(--muted)}
+.hours-time{color:var(--cream)}
+
+/* FINAL CTA */
+.cta-sec{position:relative;z-index:1;overflow:hidden;
+  padding:140px 5vw;text-align:center;border-top:1px solid var(--border)}
+#cta3d{position:absolute;inset:0;z-index:0;pointer-events:none}
+.cta-content{position:relative;z-index:2}
+.cta-content h2{font-family:'Bebas Neue',sans-serif;
+  font-size:clamp(4rem,11vw,10rem);line-height:.88;letter-spacing:.03em;margin-bottom:32px}
+.cta-content h2 span{color:var(--red);display:block}
+.cta-content h2 em{font-family:'Cormorant Garamond',serif;font-style:italic;
+  font-size:clamp(2.5rem,7vw,6rem);color:var(--gold);display:block;font-weight:300}
+.cta-content p{font-size:.8rem;line-height:2;color:var(--muted);
+  max-width:400px;margin:0 auto 48px;font-weight:300}
+.cta-btns{display:flex;gap:16px;justify-content:center;flex-wrap:wrap}
+.cta-main{padding:16px 48px;background:var(--red);color:var(--cream);
+  font-family:'DM Sans',sans-serif;font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;
+  text-decoration:none;transition:background .3s,transform .2s;display:inline-block}
+.cta-main:hover{background:#a01830;transform:translateY(-2px)}
+.cta-sec-btn{padding:16px 40px;border:1px solid var(--border);color:var(--cream);
+  font-family:'DM Sans',sans-serif;font-size:.7rem;letter-spacing:.18em;text-transform:uppercase;
+  text-decoration:none;transition:all .3s;display:inline-block}
+.cta-sec-btn:hover{border-color:var(--gold);color:var(--gold)}
+
+/* FULLSCREEN INK SPLASH DIVIDER */
+.ink-divider{height:220px;position:relative;z-index:1;overflow:hidden}
+.ink-divider canvas{width:100%;height:100%;display:block}
+
+/* COUNTER STRIP */
+.counter-strip{position:relative;z-index:1;
+  display:grid;grid-template-columns:repeat(4,1fr);gap:0;
+  border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.ctr-item{padding:40px 28px;border-right:1px solid var(--border);
+  transition:background .4s;cursor:default}
+.ctr-item:last-child{border-right:none}
+.ctr-item:hover{background:rgba(196,30,58,.04)}
+.ctr-num{font-family:'Bebas Neue',sans-serif;font-size:3.5rem;line-height:1;
+  color:var(--cream)}
+.ctr-num span{color:var(--red)}
+.ctr-label{font-size:.55rem;letter-spacing:.2em;text-transform:uppercase;
+  color:var(--muted);margin-top:6px}
+
+/* RESPONSIVE ADDITIONS */
+@media(max-width:900px){
+  .process-steps{grid-template-columns:1fr 1fr;gap:2px}
+  .process-steps::before{display:none}
+  .loc-sec{grid-template-columns:1fr}
+  .par-strip{height:240px}
+  .counter-strip{grid-template-columns:repeat(2,1fr)}
+}
+@media(max-width:560px){
+  .process-steps{grid-template-columns:1fr}
+  .cta-content h2{font-size:clamp(3rem,16vw,8rem)}
+}
+`;
+document.head.appendChild(style);
+
+// ── INJECT HTML before footer ──
+const footer=document.querySelector('footer');
+
+// 1. INK SPLASH DIVIDER (after reviews)
+const reviewsSec=document.querySelector('.reviews-sec');
+if(reviewsSec){
+  reviewsSec.insertAdjacentHTML('afterend',`
+  <div class="ink-divider"><canvas id="inkdiv"></canvas></div>
+  `);
+}
+
+// 2. PROCESS SECTION (before booking)
+const bookingSec=document.querySelector('.booking-sec');
+if(bookingSec){
+  bookingSec.insertAdjacentHTML('beforebegin',`
+  <section class="process-sec sec">
+    <div class="rv">
+      <div class="sec-tag">Der Ablauf</div>
+      <h2 class="sec-h2">VON DER IDEE<br>ZUM KUNSTWERK</h2>
+      <p style="font-size:.78rem;color:var(--muted);font-weight:300;line-height:1.9;max-width:500px;margin-top:16px">
+        4 Schritte trennen dich vom Tattoo deines Lebens. Kein Stress, keine Überraschungen — nur Kunst.
+      </p>
+    </div>
+    <div class="process-steps">
+      <div class="pstep rv">
+        <div class="pstep-num">01</div>
+        <span class="pstep-icon">✉</span>
+        <div class="pstep-title">Anfrage senden</div>
+        <div class="pstep-desc">Beschreibe dein Motiv per E-Mail, Telefon oder Instagram DM. Stil, Körperstelle, Größe. Je mehr Details — desto präziser unsere Antwort. Antwortzeit: 24–48h.</div>
+      </div>
+      <div class="pstep rv">
+        <div class="pstep-num">02</div>
+        <span class="pstep-icon">◉</span>
+        <div class="pstep-title">Beratungsgespräch</div>
+        <div class="pstep-desc">Persönlich im Studio oder per Video. Wir stimmen Artist, Stil und Design ab — live am iPad. Dein Motiv wird direkt auf deinen Körper projiziert. Kostenlos, unverbindlich.</div>
+      </div>
+      <div class="pstep rv">
+        <div class="pstep-num">03</div>
+        <span class="pstep-icon">◈</span>
+        <div class="pstep-title">Termin & Design</div>
+        <div class="pstep-desc">Nach Anzahlung wird dein Termin reserviert. Dein Artist perfektioniert das Design anatomisch. Wartezeit je nach Artist: 2–6 Wochen. Walk-ins nach Verfügbarkeit.</div>
+      </div>
+      <div class="pstep rv">
+        <div class="pstep-num">04</div>
+        <span class="pstep-icon">★</span>
+        <div class="pstep-title">Für immer auf Haut</div>
+        <div class="pstep-desc">In der entspannten Lounge-Atmosphäre entsteht dein Kunstwerk. Nach der Session: ausführliche Pflegeanleitung + Premium-Pflegeprodukte. Wir begleiten dich auch danach.</div>
+      </div>
+    </div>
+  </section>
+  `);
+}
+
+// 3. PARALLAX STRIP (between artists and reviews)
+const artistsSec=document.querySelector('.artists-sec');
+if(artistsSec){
+  artistsSec.insertAdjacentHTML('afterend',`
+  <div class="par-strip">
+    <div class="par-lane" data-parallax="0.06"><canvas id="pl0"></canvas><div class="par-lane-label">Fineline</div></div>
+    <div class="par-lane" data-parallax="-0.04"><canvas id="pl1"></canvas><div class="par-lane-label">Realistic</div></div>
+    <div class="par-lane" data-parallax="0.05"><canvas id="pl2"></canvas><div class="par-lane-label">Black & Grey</div></div>
+    <div class="par-lane" data-parallax="-0.06"><canvas id="pl3"></canvas><div class="par-lane-label">Maori</div></div>
+    <div class="par-lane" data-parallax="0.03"><canvas id="pl4"></canvas><div class="par-lane-label">Neotraditional</div></div>
+  </div>
+  `);
+}
+
+// 4. COUNTER STRIP (between maori and artists)
+const maoriSec=document.querySelector('.maori-sec');
+if(maoriSec){
+  maoriSec.insertAdjacentHTML('afterend',`
+  <div class="counter-strip" id="cstrip">
+    <div class="ctr-item"><div class="ctr-num"><span id="cn0">0</span>+</div><div class="ctr-label">Google Bewertungen</div></div>
+    <div class="ctr-item"><div class="ctr-num"><span id="cn1">0</span>K</div><div class="ctr-label">Instagram Follower</div></div>
+    <div class="ctr-item"><div class="ctr-num"><span id="cn2">0</span>+</div><div class="ctr-label">Studios in Europa</div></div>
+    <div class="ctr-item"><div class="ctr-num"><span id="cn3">0</span></div><div class="ctr-label">Artists im Team FFM</div></div>
+  </div>
+  `);
+}
+
+// 5. LOCATION SECTION (before footer)
+if(footer){
+  footer.insertAdjacentHTML('beforebegin',`
+  <section class="loc-sec sec">
+    <div class="loc-map">
+      <canvas id="mapcanv"></canvas>
+      <div class="loc-pin-wrap">
+        <div class="loc-pin"></div>
+        <div class="loc-ping"></div>
+        <div class="loc-addr">Eschenheimer Anlage 23<br>60318 Frankfurt am Main</div>
+      </div>
+    </div>
+    <div class="loc-info rv">
+      <div class="sec-tag">Finde uns</div>
+      <h2><span>MITTEN IN</span>FRANKFURT</h2>
+      <div class="loc-details">
+        <div class="loc-row"><span class="loc-row-icon">⊙</span><div>Eschenheimer Anlage 23, 60318 Frankfurt<br>Wenige Minuten von der Konstablerwache · U-Bahn direkt davor</div></div>
+        <div class="loc-row"><span class="loc-row-icon">☎</span><div><a href="tel:+496956005561" style="color:inherit;text-decoration:none">069 5600 5561</a><br><a href="tel:+4917048958960" style="color:inherit;text-decoration:none">0170 489 5896 (WhatsApp)</a></div></div>
+        <div class="loc-row"><span class="loc-row-icon">✉</span><div><a href="mailto:info@prime-ink.de" style="color:inherit;text-decoration:none">info@prime-ink.de</a></div></div>
+        <div class="loc-row"><span class="loc-row-icon">◈</span><div>@prime_ink_tattoo · @prime_ink_fineline_ffm</div></div>
+      </div>
+      <div class="hours">
+        <div class="hours-day">Montag – Samstag</div><div class="hours-time">07:00 – 22:00 Uhr</div>
+        <div class="hours-day">Sonntag</div><div class="hours-time">10:00 – 22:00 Uhr</div>
+        <div class="hours-day">Walk-Ins</div><div class="hours-time">Nach Verfügbarkeit</div>
+        <div class="hours-day">Terminbuchung</div><div class="hours-time">2–6 Wochen Wartezeit</div>
+      </div>
+      <a href="#buchen" class="btn-red" style="display:inline-flex;margin-top:32px">Termin anfragen →</a>
+    </div>
+  </section>
+
+  <section class="cta-sec sec">
+    <canvas id="cta3d"></canvas>
+    <div class="cta-content rv">
+      <div class="sec-tag" style="justify-content:center;margin-bottom:32px">Bereit?</div>
+      <h2>DEIN NÄCHSTES<br><span>TATTOO</span><em>wartet auf dich.</em></h2>
+      <p>2733 Menschen haben Prime Ink Frankfurt mit 5 Sternen bewertet.<br>101.000 folgen uns auf Instagram. Werde Teil dieser Geschichte.</p>
+      <div class="cta-btns">
+        <a href="#buchen" class="cta-main">Jetzt Termin anfragen</a>
+        <a href="https://instagram.com/prime_ink_tattoo" target="_blank" class="cta-sec-btn">@prime_ink_tattoo</a>
+        <a href="tel:+496956005561" class="cta-sec-btn">069 5600 5561</a>
+      </div>
+    </div>
+  </section>
+  `);
+}
+
+// ── RE-OBSERVE new elements ──
+setTimeout(reObserve,100);
+
+// ═══════════════════════════════════
+// ANIMATED COUNTER
+// ═══════════════════════════════════
+const targets=[2733,101,20,15];
+const ids=['cn0','cn1','cn2','cn3'];
+const cstrip=document.getElementById('cstrip');
+if(cstrip){
+  const cObs=new IntersectionObserver(entries=>{
+    if(entries[0].isIntersecting){
+      targets.forEach((target,i)=>{
+        const el=document.getElementById(ids[i]);if(!el)return;
+        let cur=0;const step=target/80;
+        const timer=setInterval(()=>{cur+=step;if(cur>=target){cur=target;clearInterval(timer);}el.textContent=Math.floor(cur);},16);
+      });
+      cObs.unobserve(cstrip);
+    }
+  },{threshold:.3});
+  cObs.observe(cstrip);
+}
+
+// ═══════════════════════════════════
+// PARALLAX STRIP CANVASES
+// Each lane: animated tattoo-style generative art
+// ═══════════════════════════════════
+const laneConfigs=[
+  {c:'#D4A843',bg:'#0d0c00',type:'fineline'},
+  {c:'#C41E3A',bg:'#0d0000',type:'skull'},
+  {c:'#8888dd',bg:'#000010',type:'hatch'},
+  {c:'#D4A843',bg:'#0a0800',type:'maori'},
+  {c:'#ff6b35',bg:'#0d0500',type:'color'},
+];
+laneConfigs.forEach((cfg,i)=>{
+  const canvas=document.getElementById('pl'+i);
+  if(!canvas)return;
+  const W=canvas.offsetWidth||200;
+  canvas.width=W;canvas.height=500;
+  const ctx=canvas.getContext('2d');
+  let t=Math.random()*100;
+  function draw(){
+    ctx.clearRect(0,0,W,500);
+    const bg=ctx.createLinearGradient(0,0,0,500);
+    bg.addColorStop(0,cfg.bg);bg.addColorStop(1,'#080810');
+    ctx.fillStyle=bg;ctx.fillRect(0,0,W,500);
+    if(cfg.type==='fineline'){
+      ctx.strokeStyle=cfg.c+'50';ctx.lineWidth=.6;
+      for(let k=0;k<5;k++){
+        ctx.beginPath();
+        for(let y=0;y<500;y+=3){
+          const x=W/2+Math.sin(y/18+t+k*.9)*W*.25+Math.sin(y/7+t*1.3)*(W*.08);
+          y===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+        }
+        ctx.stroke();
+      }
+      // Delicate dots along lines
+      ctx.fillStyle=cfg.c+'60';
+      for(let y=20;y<480;y+=22){
+        const x=W/2+Math.sin(y/18+t)*W*.25;
+        ctx.beginPath();ctx.arc(x,y,1.2,0,Math.PI*2);ctx.fill();
+      }
+    } else if(cfg.type==='skull'){
+      // Eye-socket-like ellipses
+      for(let k=0;k<4;k++){
+        const cy=80+k*110;
+        ctx.strokeStyle=cfg.c+(k%2===0?'40':'25');
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.ellipse(W/2,cy+Math.sin(t+k)*8,W*.28,22,Math.sin(t*.3+k)*.3,0,Math.PI*2);
+        ctx.stroke();
+        ctx.beginPath();
+        ctx.ellipse(W/2,cy+Math.sin(t+k)*8,W*.12,10,Math.sin(t*.3+k)*.3,0,Math.PI*2);
+        ctx.stroke();
+      }
+      // Spine-like center
+      ctx.strokeStyle=cfg.c+'30';ctx.lineWidth=.8;
+      ctx.beginPath();
+      for(let y=0;y<500;y+=2){
+        const x=W/2+Math.sin(y/15+t)*(W*.06);
+        y===0?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+    } else if(cfg.type==='hatch'){
+      // Crosshatch shading
+      ctx.strokeStyle=cfg.c+'20';ctx.lineWidth=.5;
+      for(let k=-500;k<W+500;k+=14){
+        ctx.beginPath();ctx.moveTo(k+Math.sin(t*.5)*5,0);ctx.lineTo(k+500,500);ctx.stroke();
+        ctx.beginPath();ctx.moveTo(k,0);ctx.lineTo(k-500,500);ctx.stroke();
+      }
+      // Highlight lines
+      ctx.strokeStyle=cfg.c+'40';ctx.lineWidth=.8;
+      for(let k=0;k<3;k++){
+        ctx.beginPath();
+        for(let y=0;y<500;y+=2){const x=W*.25+k*W*.25+Math.sin(y/20+t+k)*(W*.1);y===0?ctx.moveTo(x,y):ctx.lineTo(x,y);}
+        ctx.stroke();
+      }
+    } else if(cfg.type==='maori'){
+      // Concentric koru
+      ctx.lineWidth=.9;
+      for(let r=15;r<W*2;r+=15){
+        ctx.strokeStyle=r%30===0?cfg.c+'35':cfg.c+'18';
+        ctx.beginPath();ctx.arc(W/2,250,r+Math.sin(t*1.5+r*.05)*4,0,Math.PI*2);ctx.stroke();
+      }
+      // Triangle teeth
+      ctx.fillStyle=cfg.c+'20';
+      for(let k=0;k<12;k++){
+        const a=k/12*Math.PI*2+t*.1;
+        const r=60+Math.sin(t*2)*5;
+        ctx.beginPath();
+        ctx.moveTo(W/2+Math.cos(a)*r,250+Math.sin(a)*r);
+        ctx.lineTo(W/2+Math.cos(a+.2)*(r+20),250+Math.sin(a+.2)*(r+20));
+        ctx.lineTo(W/2+Math.cos(a-.2)*(r+20),250+Math.sin(a-.2)*(r+20));
+        ctx.fill();
+      }
+    } else {
+      // Neotraditional — bold spiral with color nodes
+      ctx.strokeStyle=cfg.c+'35';ctx.lineWidth=1.2;
+      ctx.beginPath();
+      for(let a=0;a<Math.PI*12;a+=.05){
+        const r=a*4;
+        const x=W/2+Math.cos(a+t*.15)*r,y=250+Math.sin(a+t*.15)*r*.8;
+        a<.05?ctx.moveTo(x,y):ctx.lineTo(x,y);
+      }
+      ctx.stroke();
+      // Accent dots
+      ctx.fillStyle=cfg.c+'55';
+      for(let k=0;k<15;k++){
+        const a=k/15*Math.PI*2+t*.2;
+        ctx.beginPath();ctx.arc(W/2+Math.cos(a)*50,250+Math.sin(a)*40,3+Math.sin(t+k)*1.5,0,Math.PI*2);ctx.fill();
+      }
+    }
+    t+=.004;requestAnimationFrame(draw);
+  }
+  draw();
+});
+
+// ═══════════════════════════════════
+// INK SPLASH DIVIDER CANVAS
+// Full-width animated ink explosion
+// ═══════════════════════════════════
+const inkdiv=document.getElementById('inkdiv');
+if(inkdiv){
+  const W=inkdiv.offsetWidth||window.innerWidth;
+  inkdiv.width=W;inkdiv.height=220;
+  const ctx=inkdiv.getContext('2d');
+  const drops=Array.from({length:30},()=>({
+    x:Math.random()*W,y:Math.random()*220,
+    vx:(Math.random()-.5)*1.5,vy:(Math.random()-.5)*1,
+    r:Math.random()*40+15,
+    color:Math.random()<.6?'#C41E3A':'#D4A843',
+    opacity:Math.random()*.3+.1,
+  }));
+  const splats=[];
+  for(let i=0;i<8;i++){
+    splats.push({
+      x:Math.random()*W,y:Math.random()*220,
+      r:Math.random()*60+20,
+      color:Math.random()<.5?'#C41E3A':'#D4A843',
+      arms:Math.floor(Math.random()*6)+4,
+      phase:Math.random()*Math.PI*2,
+    });
+  }
+  let t=0;
+  function drawInkDiv(){
+    ctx.clearRect(0,0,W,220);
+    // Dark gradient bg
+    const grad=ctx.createLinearGradient(0,0,0,220);
+    grad.addColorStop(0,'#080810');grad.addColorStop(.5,'#0d0d1a');grad.addColorStop(1,'#080810');
+    ctx.fillStyle=grad;ctx.fillRect(0,0,W,220);
+    // Ink splats
+    splats.forEach(s=>{
+      for(let i=0;i<s.arms;i++){
+        const a=s.phase+i/s.arms*Math.PI*2+t*.05;
+        const len=s.r*(1+Math.sin(t*2+i)*.2);
+        ctx.strokeStyle=s.color+'30';ctx.lineWidth=2+Math.sin(t+i)*1;
+        ctx.beginPath();ctx.moveTo(s.x,s.y);
+        ctx.bezierCurveTo(
+          s.x+Math.cos(a+.3)*len*.5,s.y+Math.sin(a+.3)*len*.5,
+          s.x+Math.cos(a-.3)*len*.8,s.y+Math.sin(a-.3)*len*.8,
+          s.x+Math.cos(a)*len,s.y+Math.sin(a)*len
+        );
+        ctx.stroke();
+        // Droplet at tip
+        ctx.fillStyle=s.color+'40';
+        ctx.beginPath();ctx.arc(s.x+Math.cos(a)*len,s.y+Math.sin(a)*len,3,0,Math.PI*2);ctx.fill();
+      }
+      // Center blob
+      const g=ctx.createRadialGradient(s.x,s.y,0,s.x,s.y,s.r*.4);
+      g.addColorStop(0,s.color+'25');g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(s.x,s.y,s.r*.4,0,Math.PI*2);ctx.fill();
+    });
+    // Floating drops
+    drops.forEach(d=>{
+      d.x+=d.vx;d.y+=d.vy;
+      if(d.x<-d.r||d.x>W+d.r)d.vx*=-1;
+      if(d.y<-d.r||d.y>220+d.r)d.vy*=-1;
+      const g=ctx.createRadialGradient(d.x,d.y,0,d.x,d.y,d.r);
+      g.addColorStop(0,d.color+(Math.round(d.opacity*255).toString(16).padStart(2,'0')));
+      g.addColorStop(1,'transparent');
+      ctx.fillStyle=g;ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,Math.PI*2);ctx.fill();
+    });
+    // Center text
+    ctx.font='300 .6rem "DM Sans",sans-serif';
+    ctx.fillStyle='rgba(240,237,230,.15)';
+    ctx.letterSpacing='4px';
+    ctx.textAlign='center';
+    ctx.fillText('PRIME INK · FRANKFURT · SEIT 2019 · @prime_ink_tattoo',W/2,115);
+    t+=.003;requestAnimationFrame(drawInkDiv);
+  }
+  drawInkDiv();
+}
+
+// ═══════════════════════════════════
+// MAP CANVAS — animated city grid
+// ═══════════════════════════════════
+const mapC=document.getElementById('mapcanv');
+if(mapC){
+  const W=mapC.offsetWidth||500;
+  mapC.width=W;mapC.height=400;
+  const ctx=mapC.getContext('2d');
+  let t=0;
+  function drawMap(){
+    const H=400;
+    ctx.clearRect(0,0,W,H);
+    ctx.fillStyle='#08080f';ctx.fillRect(0,0,W,H);
+    // Grid streets
+    ctx.strokeStyle='rgba(240,237,230,.06)';ctx.lineWidth=.5;
+    for(let x=0;x<W;x+=25){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,H);ctx.stroke();}
+    for(let y=0;y<H;y+=25){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(W,y);ctx.stroke();}
+    // Main roads
+    ctx.strokeStyle='rgba(240,237,230,.14)';ctx.lineWidth=1.5;
+    [[0,H*.45,W,H*.45],[W*.55,0,W*.55,H],[0,H*.72,W,H*.72],[W*.28,0,W*.28,H]].forEach(([x1,y1,x2,y2])=>{
+      ctx.beginPath();ctx.moveTo(x1,y1);ctx.lineTo(x2,y2);ctx.stroke();
+    });
+    // Eschenheimer Anlage — diagonal highlight
+    ctx.strokeStyle='rgba(196,30,58,.2)';ctx.lineWidth=2;
+    ctx.setLineDash([8,4]);
+    ctx.beginPath();ctx.moveTo(W*.3,0);ctx.lineTo(W*.7,H);ctx.stroke();
+    ctx.setLineDash([]);
+    // Location dot
+    const px=W*.55,py=H*.45;
+    // Ripple rings
+    for(let r=0;r<3;r++){
+      const rad=((t*40+r*40)%120)+5;
+      const alpha=1-(rad/120)*.9;
+      ctx.strokeStyle=`rgba(196,30,58,${alpha*.5})`;ctx.lineWidth=1;
+      ctx.beginPath();ctx.arc(px,py,rad,0,Math.PI*2);ctx.stroke();
+    }
+    // Red dot
+    const gd=ctx.createRadialGradient(px,py,0,px,py,10);
+    gd.addColorStop(0,'#C41E3A');gd.addColorStop(1,'rgba(196,30,58,0)');
+    ctx.fillStyle=gd;ctx.beginPath();ctx.arc(px,py,10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(px,py,3,0,Math.PI*2);ctx.fill();
+    // Label
+    ctx.font='500 10px "DM Sans",sans-serif';
+    ctx.fillStyle='rgba(240,237,230,.6)';ctx.textAlign='left';
+    ctx.fillText('Prime Ink',px+14,py+4);
+    ctx.font='300 9px "DM Sans",sans-serif';
+    ctx.fillStyle='rgba(240,237,230,.35)';
+    ctx.fillText('Eschenheimer Anlage 23',px+14,py+16);
+    t+=.015;requestAnimationFrame(drawMap);
+  }
+  drawMap();
+}
+
+// ═══════════════════════════════════
+// FINAL CTA 3D — tattoo flash sheet particles
+// Thousands of tiny needles + ink spheres in a vortex
+// ═══════════════════════════════════
+(function ctaScene(){
+  const canvas=document.getElementById('cta3d');
+  if(!canvas)return;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:false});
+  renderer.setPixelRatio(Math.min(devicePixelRatio,1.2));
+  function resize(){
+    renderer.setSize(canvas.offsetWidth,canvas.offsetHeight);
+    cam.aspect=canvas.offsetWidth/canvas.offsetHeight;
+    cam.updateProjectionMatrix();
+  }
+  const cam=new THREE.PerspectiveCamera(60,canvas.offsetWidth/canvas.offsetHeight||2,.1,200);
+  cam.position.z=50;
+  const scene=new THREE.Scene();
+  resize();window.addEventListener('resize',resize);
+
+  // ── Vortex of tattoo needles ──
+  const nGeo=new THREE.CylinderGeometry(.03,.03,2.5,5);
+  const nMat=new THREE.MeshBasicMaterial({color:0x1a1a2a,transparent:true,opacity:.5});
+  const tipMat=new THREE.MeshBasicMaterial({color:0xC41E3A,transparent:true,opacity:.6});
+  const tipGeo=new THREE.ConeGeometry(.03,.12,5);
+  const needles=[];
+  for(let i=0;i<120;i++){
+    const g=new THREE.Group();
+    const shaft=new THREE.Mesh(nGeo,nMat);
+    const tip=new THREE.Mesh(tipGeo,tipMat);tip.position.y=-1.3;
+    g.add(shaft);g.add(tip);
+    // Vortex distribution
+    const angle=i/120*Math.PI*2;
+    const ringR=8+Math.random()*30;
+    const height=(Math.random()-.5)*20;
+    g.position.set(Math.cos(angle)*ringR,height,Math.sin(angle)*ringR-5);
+    g.rotation.set(Math.random()*Math.PI,Math.random()*Math.PI,Math.random()*Math.PI);
+    g.userData={angle,ringR,height,speed:.003+Math.random()*.004,phase:Math.random()*Math.PI*2};
+    scene.add(g);needles.push(g);
+  }
+
+  // ── Ink particle cloud ──
+  const pCount=3000;
+  const pGeo=new THREE.BufferGeometry();
+  const pPos=new Float32Array(pCount*3);
+  const pCol=new Float32Array(pCount*3);
+  for(let i=0;i<pCount;i++){
+    const theta=Math.random()*Math.PI*2;
+    const phi=Math.acos(2*Math.random()-1);
+    const r=Math.random()*45+5;
+    pPos[i*3]=r*Math.sin(phi)*Math.cos(theta);
+    pPos[i*3+1]=r*Math.sin(phi)*Math.sin(theta);
+    pPos[i*3+2]=r*Math.cos(phi)-8;
+    const col=Math.random();
+    if(col<.4){pCol[i*3]=.769;pCol[i*3+1]=.118;pCol[i*3+2]=.227;}  // red
+    else if(col<.6){pCol[i*3]=.831;pCol[i*3+1]=.659;pCol[i*3+2]=.263;} // gold
+    else{pCol[i*3]=.94;pCol[i*3+1]=.93;pCol[i*3+2]=.9;}  // cream
+  }
+  pGeo.setAttribute('position',new THREE.BufferAttribute(pPos,3));
+  pGeo.setAttribute('color',new THREE.BufferAttribute(pCol,3));
+  const pMat=new THREE.PointsMaterial({
+    size:.22,vertexColors:true,transparent:true,opacity:.55,
+    blending:THREE.AdditiveBlending,depthWrite:false,sizeAttenuation:true,
+  });
+  const pts=new THREE.Points(pGeo,pMat);scene.add(pts);
+
+  // ── Spiral coil rings ──
+  for(let s=0;s<4;s++){
+    const pts2=[];
+    for(let i=0;i<300;i++){
+      const a=i/300*Math.PI*16;
+      pts2.push(new THREE.Vector3(Math.cos(a)*12,i/300*30-15,Math.sin(a)*12+(s-1.5)*18));
+    }
+    const curve=new THREE.CatmullRomCurve3(pts2);
+    const tGeo=new THREE.TubeGeometry(curve,200,.05,4,false);
+    const tMat=new THREE.MeshBasicMaterial({
+      color:s%2===0?0xC41E3A:0xD4A843,transparent:true,opacity:.05
+    });
+    scene.add(new THREE.Mesh(tGeo,tMat));
+  }
+
+  scene.add(new THREE.AmbientLight(0xffffff,.3));
+  const l1=new THREE.PointLight(0xC41E3A,3,60);scene.add(l1);
+  const l2=new THREE.PointLight(0xD4A843,2,50);scene.add(l2);
+
+  let T=0,mx=0,my=0;
+  document.addEventListener('mousemove',e=>{mx=(e.clientX/innerWidth-.5)*2;my=-(e.clientY/innerHeight-.5)*2;});
+
+  function animCTA(){
+    requestAnimationFrame(animCTA);T+=.004;
+    // Needles orbit in vortex
+    needles.forEach(n=>{
+      n.userData.angle+=n.userData.speed;
+      n.position.x=Math.cos(n.userData.angle)*n.userData.ringR;
+      n.position.z=Math.sin(n.userData.angle)*n.userData.ringR-5;
+      n.position.y=n.userData.height+Math.sin(T*1.5+n.userData.phase)*2;
+      n.rotation.y=T*.5;n.rotation.z=T*.3;
+    });
+    pts.rotation.y=T*.06+mx*.1;pts.rotation.x=T*.03+my*.06;
+    l1.position.set(Math.sin(T*.6)*20,Math.cos(T*.4)*15,10);
+    l2.position.set(Math.cos(T*.5)*18,-Math.sin(T*.7)*12,8);
+    renderer.render(scene,cam);
+  }
+  animCTA();
+})();
+
+}); // end DOMContentLoaded
+</script>
+</body>
+</html>
